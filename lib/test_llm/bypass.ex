@@ -1,4 +1,8 @@
 defmodule TestLlm.Bypass do
+  @moduledoc """
+  Stubing LLM responses with Bypass
+  """
+
   import TestLlm.Helpers
 
   alias TestLlm.ResponsesTracker
@@ -9,6 +13,19 @@ defmodule TestLlm.Bypass do
     "http://localhost:#{port}"
   end
 
+  @doc """
+  Stubs the expected response.
+
+  ## Options
+
+  Basic request options:
+
+    * `:key` - stub reponse file name transformed to slug.
+    * `:original_base_url` - The base url for the call to the LLM.
+    * `:bypass` - The bypass connection.
+    * `:rerun` - should the request be rerun and saved, defaults to `:false`.
+    * `:model` - should the request be rerun and saved, defaults to `the name of the model from the request if available`.
+  """
   def expect_response(key) when is_binary(key) do
     expect_response(key: key)
   end
@@ -64,6 +81,19 @@ defmodule TestLlm.Bypass do
     Bypass.expect(bypass, wrapperFn)
   end
 
+  @doc """
+  Stubs the expected stream response.
+
+  ## Options
+
+  Basic request options:
+
+    * `:key` - stub reponse file name transformed to slug.
+    * `:original_base_url` - The base url for the call to the LLM.
+    * `:bypass` - The bypass connection.
+    * `:rerun` - should the request be rerun and saved, defaults to `:false`.
+    * `:model` - should the request be rerun and saved, defaults to `the name of the model from the request if available`.
+  """
   def expect_stream_response(key) when is_binary(key) do
     expect_stream_response(key: key)
   end

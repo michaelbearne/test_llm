@@ -1,12 +1,30 @@
 defmodule TestLlm.Req do
+  @moduledoc """
+  Stubing LLM responses with Req.Test
+  """
+
   import TestLlm.Helpers
 
   alias TestLlm.ResponsesTracker
 
   @receive_timeout :timer.minutes(4)
 
+  @doc """
+  Returns the req test plug to use pass to req as a plug option.
+  """
   def plug, do: {Req.Test, __MODULE__}
 
+  @doc """
+  Stubs the expected response.
+
+  ## Options
+
+  Basic request options:
+
+    * `:key` - stub reponse file name transformed to slug.
+    * `:rerun` - should the request be rerun and saved, defaults to `:false`.
+    * `:model` - should the request be rerun and saved, defaults to `the name of the model from the request if available`.
+  """
   def expect_response(key) when is_binary(key) do
     expect_response(key: key)
   end
@@ -55,6 +73,17 @@ defmodule TestLlm.Req do
     Req.Test.expect(__MODULE__, wrapperFn)
   end
 
+  @doc """
+  Stubs the expected stream response.
+
+  ## Options
+
+  Basic request options:
+
+    * `:key` - stub reponse file name transformed to slug.
+    * `:rerun` - should the request be rerun and saved, defaults to `:false`.
+    * `:model` - should the request be rerun and saved, defaults to `the name of the model from the request if available`.
+  """
   def expect_stream_response(key) when is_binary(key) do
     expect_stream_response(key: key)
   end

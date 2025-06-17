@@ -1,4 +1,11 @@
 defmodule TestLlm do
+  @external_resource readme = Path.join([__DIR__, "../README.md"])
+  @doc_readme File.read!(readme)
+
+  @moduledoc """
+  #{@doc_readme}
+  """
+
   import TestLlm.Helpers
 
   def fetch_response(model, keys) when is_list(keys) do
