@@ -1,6 +1,8 @@
 defmodule TestLlm.Req do
   import TestLlm.Helpers
 
+  alias TestLlm.ResponsesTracker
+
   @receive_timeout :timer.minutes(4)
 
   def plug, do: {Req.Test, __MODULE__}
@@ -14,9 +16,12 @@ defmodule TestLlm.Req do
     rerun = Keyword.get(opts, :rerun, false)
     model = Keyword.get(opts, :model)
 
+    {:ok, _pid} = ResponsesTracker.maybe_start()
+
     wrapperFn = fn conn ->
       model = model || extract_model_name(conn.request_path)
       file_path = file_path(key, model)
+      ResponsesTracker.hit(file_path)
 
       if !rerun && File.exists?(file_path) do
         resp = File.read!(file_path)
@@ -59,10 +64,13 @@ defmodule TestLlm.Req do
     rerun = Keyword.get(opts, :rerun, false)
     model = Keyword.get(opts, :model)
 
+    {:ok, _pid} = ResponsesTracker.maybe_start()
+
     wrapperFn = fn conn ->
       model = model || extract_model_name(conn.request_path)
 
       file_path = stream_file_path(key, model)
+      ResponsesTracker.hit(file_path)
 
       if !rerun && File.exists?(file_path) do
         resp = file_path |> File.read!()

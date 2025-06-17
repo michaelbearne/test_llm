@@ -1,6 +1,8 @@
 defmodule TestLlm.Bypass do
   import TestLlm.Helpers
 
+  alias TestLlm.ResponsesTracker
+
   def open, do: Bypass.open()
 
   def base_url(%Bypass{port: port}) do
@@ -29,9 +31,12 @@ defmodule TestLlm.Bypass do
     model = Keyword.get(opts, :model)
     move_to_next_response_cb = Keyword.get(opts, :cb)
 
+    {:ok, _pid} = ResponsesTracker.maybe_start()
+
     wrapperFn = fn conn ->
       model = model || extract_model_name(conn.request_path)
       file_path = file_path(key, model)
+      ResponsesTracker.hit(file_path)
 
       if !rerun && File.exists?(file_path) do
         resp = File.read!(file_path)
@@ -80,9 +85,12 @@ defmodule TestLlm.Bypass do
     model = Keyword.get(opts, :model)
     move_to_next_response_cb = Keyword.get(opts, :cb)
 
+    {:ok, _pid} = ResponsesTracker.maybe_start()
+
     wrapperFn = fn conn ->
       model = model || extract_model_name(conn.request_path)
       file_path = stream_file_path(key, model)
+      ResponsesTracker.hit(file_path)
 
       if !rerun && File.exists?(file_path) do
         resp = File.read!(file_path)
