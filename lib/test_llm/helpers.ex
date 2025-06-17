@@ -1,6 +1,13 @@
 defmodule TestLlm.Helpers do
-  def file_path(key, model \\ "gpt-3.5-turbo") do
-    Path.join([base_dir(), "responses", Slug.slugify(model), file_name(key)])
+  def extract_model_name(request_path) do
+    request_path |> Path.split() |> List.last() |> String.split(":", parts: 2) |> List.first()
+  end
+
+  def replace_model_resp(prompt, key, resp) when is_atom(prompt) do
+    path = to_file_path(prompt, key)
+    dir = Path.dirname(path)
+    unless File.exists?(dir), do: File.mkdir_p!(dir)
+    File.write!(path, Jason.encode!(resp, pretty: true))
   end
 
   def to_file_path(prompt, key) when is_binary(key) do
@@ -17,7 +24,7 @@ defmodule TestLlm.Helpers do
   end
 
   def stream_file_name(name) do
-    "#{Slug.slugify(name, separator: "_")}_resp.stream4"
+    "#{Slug.slugify(name, separator: "_")}_resp.stream"
   end
 
   def folder_name(names) when is_list(names) do
@@ -38,6 +45,19 @@ defmodule TestLlm.Helpers do
 
   def base_dir do
     Application.fetch_env!(:test_llm, :base_dir)
-    # Keyword.fetch!(cfg, :base_dir)
+  end
+
+  def write_resp(path, resp) do
+    dir = Path.dirname(path)
+    unless File.exists?(dir), do: File.mkdir_p!(dir)
+    File.write!(path, Jason.encode!(resp, pretty: true))
+  end
+
+  def file_path(key, model) do
+    Path.join([base_dir(), "responses", Slug.slugify(model), file_name(key)])
+  end
+
+  def stream_file_path(key, model) do
+    Path.join([base_dir(), "responses", Slug.slugify(model), stream_file_name(key)])
   end
 end
